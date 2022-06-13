@@ -16,6 +16,10 @@ class Tree
         elsif self.parent.nil?
             @parent = node
             node.children << self
+        else
+            @parent.children.delete(self)
+            @parent = node
+            node.children << self
         end
     end
 
@@ -28,7 +32,7 @@ class Tree
     end
 
     def dfs(target) #target = []
-        return self if self.position = target
+        return self if self.position == target
         self.children.each do |child|
             search_result = child.dfs(target)
             return search_result if !search_result.nil?

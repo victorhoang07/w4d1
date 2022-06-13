@@ -28,52 +28,79 @@ class KnightPathFinder
 
     def new_move_positions(node)
         pos = node.position
-        new_positions1 = [pos[0] + 1, pos[1] + 2]
-        new_positions2 = [pos[0] + 2, pos[1] + 1]
-        p1 = true
-        p2 = true
-        p1 = false if !valid?(new_positions1)
-        p2 = false if !valid?(new_positions2)   
-        
-        ret_val = []
+        one = [-1, 1]
+        two = [-2, 2]
+        possible_positions = []
 
-        @considered_positions.each do |node2|
-            if node2.position == new_positions1
-                p1 = false
+        one.each do |ele|
+            two.each do |ele2|
+                new_pos = [pos[0] + ele, pos[1] + ele2]
+                new_pos2 = [pos[0] + ele2, pos[1] + ele]
+                if valid?(new_pos) && !already_considered?(new_pos)
+                    new_node = Tree.new(new_pos)
+                    new_node.parent = node
+                    possible_positions << new_node
+                    @considered_positions << new_node
+                end
+                if valid?(new_pos2) && !already_considered?(new_pos2)
+                    new_node2 = Tree.new(new_pos2)
+                    new_node2.parent = node
+                    possible_positions << new_node2
+                    @considered_positions << new_node2
+                end
             end
-            if node2.position == new_positions2
-                p2 = false
-            end
-            break if !p1 && !p2
         end
-        if p1
-            left = Tree.new(new_positions1)
-            left.parent = node
-            @considered_positions << left
-            ret_val << left
-        end
-        if p2
-            right = Tree.new(new_positions2)
-            right.parent = node
-            @considered_positions << right
-            ret_val << right
-        end
-        ret_val
+
+        possible_positions
     end
+
+    def already_considered?(pos)
+        @considered_positions.each do |node|
+            if node.position == pos
+                return true
+            end
+        end
+        return false
+    end
+                
             
     def build_move_tree
         queue = [@root_node]
-
         until queue.empty?
-            # p queue
+            # debugger
             node = queue.shift
             new_pos = new_move_positions(node)
-            new_pos.each {|ele| queue << ele}
+            new_pos.each do |ele| 
+                queue << ele
+            end
         end
-        return @considered_positions
+        return @root_node #@considered_positions
     end
+
+    def find_path(end_pos)
+        node = self.build_move_tree.dfs(end_pos)
+        trace_path_back(node)
+    end
+
+    def trace_path_back(node)
+        return nil if node.nil?
+        parents = []
+        current_node = node
+        while current_node != @root_node
+            parents.unshift(current_node.position)
+            current_node = current_node.parent
+        end
+        parents.unshift(@root_node.position)
+        parents
+    end
+
 end
 
 root = KnightPathFinder.new([0,0])
-# root.new_move_positions(root.root_node)
-p root.build_move_tree
+# p root.new_move_positions(root.root_node)
+# p root.new_move_positions(node)
+# b = root.new_move_positions(a.root_node)
+# c = root.new_move_positions(b.root_node)
+# p c
+# p root.build_move_tree
+p root.find_path([7,6])
